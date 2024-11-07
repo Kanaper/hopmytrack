@@ -39,6 +39,8 @@ rm $hmt_path ||
 chmod +x $hmt_root/bin/hmt ||
   error "Failed to set permissions on HopMyTrack executable"
 
+echo "HopMyTrack succesfully installed!"
+
 # Adding the executable to the PATH
 if ! grep -q $hmt_root/bin <<< $PATH; then
   export PATH="$PATH:$hmt_root/bin"
@@ -47,5 +49,6 @@ if ! grep -q $hmt_root/bin <<< $PATH; then
   echo "# HopMyTrack" >> "$HOME/.bashrc"
   echo "export PATH=\"\$PATH:$hmt_root/bin\"" >> "$HOME/.bashrc"
 
-  echo "Please restart your terminal or run \"source ~/.bashrc\""
+  echo ""
+  echo "Please restart your terminal or run \"source ~/.bashrc\" to be able to use the command 'hmt'"
 fi

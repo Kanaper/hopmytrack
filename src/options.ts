@@ -1,9 +1,7 @@
-import parseArgs, { OptionPayloadType } from "./parseArgs";
-import fs from "fs";
-import path from "path";
+import parseArgs, { OptionPayloadType, type OptionPayload } from "./parseArgs";
 import type { Type } from "./structures/Website";
 
-export const optionList = {
+export const optionList: Record<string, OptionPayload<OptionPayloadType>> = {
   help: {
     alias: "h",
     unique: true,
@@ -18,6 +16,14 @@ export const optionList = {
     type: OptionPayloadType.BOOLEAN,
     description: "Show the version.",
     usage: "--version",
+    default: false,
+  },
+  update: {
+    alias: "u",
+    unique: true,
+    type: OptionPayloadType.BOOLEAN,
+    description: "Update the tool.",
+    usage: "--update",
     default: false,
   },
   output: {
@@ -68,36 +74,12 @@ export const optionList = {
     usage: "--whitelist=<website1>,<website2>,...",
     default: null,
   },
-  "whitelist-file": {
-    alias: "W",
-    unique: false,
-    type: OptionPayloadType.STRING,
-    description: "Set a file with a list of websites to search through.",
-    usage: "--whitelist-file=<file>",
-    default: null,
-  },
   blacklist: {
     alias: "b",
     unique: false,
     type: OptionPayloadType.ARRAY,
     description: "Set a list of websites to ignore.",
     usage: "--blacklist=<website1>,<website2>,...",
-    default: null,
-  },
-  "blacklist-file": {
-    alias: "B",
-    unique: false,
-    type: OptionPayloadType.STRING,
-    description: "Set a file with a list of websites to ignore.",
-    usage: "--blacklist-file=<file>",
-    default: null,
-  },
-  info: {
-    alias: "i",
-    unique: true,
-    type: OptionPayloadType.STRING,
-    description: "Information about a website.",
-    usage: "--input=<website|type>",
     default: null,
   },
   proxy: {
@@ -108,13 +90,13 @@ export const optionList = {
     usage: "--proxy=<proxy>",
     default: null,
   },
-  input: {
-    alias: "I",
-    unique: false,
-    type: OptionPayloadType.STRING,
-    description: "Input file.",
-    usage: "--input=<file>",
-    default: null,
+  list: {
+    alias: "l",
+    unique: true,
+    type: OptionPayloadType.BOOLEAN,
+    description: "List all available websites.",
+    usage: "--list",
+    default: false,
   },
 };
 
@@ -126,18 +108,6 @@ if (options.proxy && !options.proxy.startsWith("http")) {
 
 const whitelist = [...new Set(options.whitelist ?? [])];
 const blacklist = [...new Set(options.blacklist ?? [])];
-
-if (options["whitelist-file"]) {
-  const file = path.join(process.cwd(), options["whitelist-file"]);
-  const data = fs.readFileSync(file, "utf-8");
-  whitelist.push(...data.split(/\r?\n/).map((line) => line.trim()));
-}
-
-if (options["blacklist-file"]) {
-  const file = path.join(process.cwd(), options["blacklist-file"]);
-  const data = fs.readFileSync(file, "utf-8");
-  blacklist.push(...data.split(/\r?\n/).map((line) => line.trim()));
-}
 
 function allowed(id: string, type: Type) {
   if (id === "root") return true;

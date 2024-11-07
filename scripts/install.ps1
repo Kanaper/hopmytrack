@@ -41,29 +41,18 @@ Move-Item -Path "$HmtRoot\$FileName.exe" -Destination "$HmtRoot\bin\hmt.exe" -Fo
 # Cleaning up the zip file
 Remove-Item $HmtPath -Force
 
-# Verifying if there is other hmt.exe in the PATH
-$pathAlreadyExists = $false;
+Write-Output "HopMyTrack succesfully installed!"
 
-try {
-  $existing = Get-Command hmt -ErrorAction
+$CurrentPath = [System.Environment]::GetEnvironmentVariable("Path", [System.EnvironmentVariableTarget]::User)
 
-  if ($existing.Source -ne $HmtPath) {
-    Write-Warning "Note: Another hmt.exe is already in %PATH% at $($existing.Source)`nTyping 'hmt' in your terminal will not use what was just installed.`n"
-    $pathAlreadyExists = $true;
-  }
-} catch {}
-
-# Adding the executable to the PATH
-if(!$pathAlreadyExists) {
-  $CurrentPath = [System.Environment]::GetEnvironmentVariable("Path", [System.EnvironmentVariableTarget]::User)
-  
-  if ($CurrentPath -notmatch [RegEx]::Escape("$HmtRoot\bin")) {
-    $NewPath = "$CurrentPath;$HmtRoot\bin"
-    [System.Environment]::SetEnvironmentVariable("Path", $NewPath, [System.EnvironmentVariableTarget]::User)
-  }
-
-  Write-Output "To get started, restart your terminal/editor, then type `"hmt`""
+if ($CurrentPath -notmatch [RegEx]::Escape("$HmtRoot\bin")) {
+  $NewPath = "$CurrentPath;$HmtRoot\bin"
+  [System.Environment]::SetEnvironmentVariable("Path", $NewPath, [System.EnvironmentVariableTarget]::User)
+} else {
+  Write-Warning "`nNote: Another hmt.exe is already in %PATH% at $($Existing.Source)`nTyping 'hmt' in your terminal will not use what was just installed."
 }
+
+Write-Output "`nStart another terminal to be able to use the command 'hmt'"
 
 # Adding the uninstall script
 $rootKey = $null
@@ -77,7 +66,7 @@ try {
   New-ItemProperty -Path $RegistryKey -Name "DisplayIcon" -Value "$HmtRoot\bin\hmt.exe" -PropertyType String -Force | Out-Null
   New-ItemProperty -Path $RegistryKey -Name "UninstallString" -Value "powershell -c `"& `'$HmtRoot\uninstall.ps1`' -PauseOnError`" -ExecutionPolicy Bypass" -PropertyType String -Force | Out-Null
 } catch {
-  if ($rootKey -ne $null) {
+  if ($null -ne $rootKey) {
     Remove-Item -Path $RegistryKey -Force
   }
 }
